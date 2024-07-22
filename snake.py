@@ -98,13 +98,13 @@ def main():
                     pygame.quit()
                     exit()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w or event.key == pygame.K_UP and direction != "DOWN":
+                    if (event.key == pygame.K_w or event.key == pygame.K_UP) and direction != "DOWN":
                         direction = "UP"
-                    elif event.key == pygame.K_a or event.key == pygame.K_LEFT and direction != "RIGHT":
+                    elif (event.key == pygame.K_a or event.key == pygame.K_LEFT) and direction != "RIGHT":
                         direction = "LEFT"
-                    elif event.key == pygame.K_s or event.key == pygame.K_DOWN and direction != "UP":
+                    elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP":
                         direction = "DOWN"
-                    elif event.key == pygame.K_d or event.key == pygame.K_RIGHT and direction != "LEFT":
+                    elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT":
                         direction = "RIGHT"
             
             # Update snake direction
@@ -118,6 +118,10 @@ def main():
                     new_head = (snake_segments[0][0], snake_segments[0][1] + snake_speed)
                 elif direction == "RIGHT":
                     new_head = (snake_segments[0][0] + snake_speed, snake_segments[0][1])
+                
+                # Check for collision with body
+                if new_head in snake_segments:
+                    break
                 
                 # Insert new head segment
                 snake_segments = [new_head] + snake_segments[:-1]
