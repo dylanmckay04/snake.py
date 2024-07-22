@@ -22,7 +22,7 @@ def draw_grid():
 
 # Display text
 def display_message(text, size, color, y_offset=0):
-    font = pygame.font.Font(None, size)
+    font = pygame.font.Font("fonts/data-latin.ttf", size)
     message = font.render(text, True, color)
     rect = message.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + y_offset))
     screen.blit(message, rect)
