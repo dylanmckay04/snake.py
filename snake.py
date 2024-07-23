@@ -60,7 +60,7 @@ def reset_high_score():
         file.write(str(0))
 
 # Mute & unmute music
-def mute_music():
+def toggle_music():
     global is_music_muted
     if is_music_muted:
         pygame.mixer.music.set_volume(0.1)
@@ -154,15 +154,20 @@ def main():
         pygame.mixer.music.play(-1) # Loop background music
         pygame.mixer.music.set_volume(.1)
         
+        # Surface for border and inner snake segments
+        snake_border_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+        snake_border_surface.fill("black")
+        inner_snake_surface = pygame.Surface((BLOCK_SIZE - 4, BLOCK_SIZE - 4))
+        inner_snake_surface.fill("green")
+        snake_border_surface.blit(inner_snake_surface, (2, 2))
+        
         # Snake attributes
-        snake_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-        snake_surface.fill("green")
         snake_x_pos = BLOCK_SIZE * 7
         snake_y_pos = BLOCK_SIZE * 7
         snake_speed = BLOCK_SIZE
         direction = None
         
-        # Apple attributes
+        # Apple surface & attributes
         apple_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
         apple_surface.fill("red")
         apple_x_pos, apple_y_pos = get_random_position()
@@ -196,7 +201,7 @@ def main():
                         direction = "RIGHT"
                     # Mute/unmute music
                     elif event.key == pygame.K_m:
-                        mute_music()
+                        toggle_music()
                 
             if direction: # Snake begins moving once a direction key is pressed (i.e. if direction != None)
                 # Add new head segment based on direction
@@ -243,7 +248,7 @@ def main():
             
             screen.blit(apple_surface, apple_rect.topleft)
             for segment in snake_segments:
-                screen.blit(snake_surface, segment)
+                screen.blit(snake_border_surface, segment)
             
             # Draw game border
             pygame.draw.rect(screen, pygame.color.Color(20, 11, 71), (GAME_WIDTH, 0, BORDER_WIDTH, WINDOW_HEIGHT))
