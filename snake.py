@@ -44,7 +44,7 @@ def read_high_score():
     try:
         with open(HIGH_SCORE_FILE, "r") as file:
             return int(file.read().strip())
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         return 0
 
 # Write high score to file
@@ -105,6 +105,7 @@ def game_over(score, start_time, high_score):
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
+                    game_over_sound.stop() # Stop game over sound playing over music at start of new game
                     return True, high_score
                 elif event.key == pygame.K_q:
                     pygame.quit()
@@ -135,7 +136,6 @@ def main():
     high_score = read_high_score()
     
     while True:
-        game_over_sound.stop() # Stop game over sound playing over music at start of new game
         pygame.mixer.music.load(background_music)
         pygame.mixer.music.play(-1) # Loop background music
         pygame.mixer.music.set_volume(.1)
@@ -148,16 +148,16 @@ def main():
         snake_speed = BLOCK_SIZE
         direction = None
         
-        # Initialize snake segments, score & time
-        snake_segments = [(snake_x_pos, snake_y_pos)]
-        score = 0
-        start_time = time()
-        
         # Apple attributes
         apple_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
         apple_surface.fill("red")
         apple_x_pos, apple_y_pos = get_random_position()
         apple_rect = apple_surface.get_rect(topleft=(apple_x_pos, apple_y_pos))
+        
+        # Initialize snake segments, score & time
+        snake_segments = [(snake_x_pos, snake_y_pos)]
+        score = 0
+        start_time = time()
         
         # Main gameplay loop
         while True:
@@ -210,6 +210,7 @@ def main():
                 else:
                     high_score_sound.play() # Play sound when new high score achieved
                     high_score = score
+                    write_high_score(high_score) # Immediately write new high score to high_score.txt
                 
             # Ensure the snake stays within the grid
             head_x, head_y = snake_segments[0]
