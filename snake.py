@@ -12,6 +12,8 @@ WINDOW_WIDTH = GAME_WIDTH + BORDER_WIDTH
 WINDOW_HEIGHT = GAME_HEIGHT
 HIGH_SCORE_FILE = "data/high_score.txt"
 
+is_music_muted = False # Global variable for mute_music()
+
 # Random coordinates for apple
 def get_random_position():
     x = randrange(0, GAME_WIDTH - BLOCK_SIZE, BLOCK_SIZE)
@@ -56,6 +58,17 @@ def write_high_score(high_score):
 def reset_high_score():
     with open(HIGH_SCORE_FILE, 'w') as file:
         file.write(str(0))
+
+# Mute & unmute music
+def mute_music():
+    global is_music_muted
+    if is_music_muted:
+        pygame.mixer.music.set_volume(0.1)
+        is_music_muted = False
+    else:
+        pygame.mixer.music.set_volume(0)
+        is_music_muted = True
+        
 
 # Welcome screen
 def welcome_screen():
@@ -118,7 +131,8 @@ def main():
     pygame.mixer.init()
     
     # Load sound effects
-    background_music = "audio/cyborg_ninja.wav"
+    snake_move_sound = pygame.mixer.Sound("audio/snake_move.wav")
+    snake_move_sound.set_volume(.5)
     eat_sound = pygame.mixer.Sound("audio/eat_sound.wav")
     eat_sound.set_volume(.8)
     game_over_sound = pygame.mixer.Sound("audio/game_over.wav")
@@ -136,7 +150,7 @@ def main():
     high_score = read_high_score()
     
     while True:
-        pygame.mixer.music.load(background_music)
+        pygame.mixer.music.load("audio/cyborg_ninja.wav")
         pygame.mixer.music.play(-1) # Loop background music
         pygame.mixer.music.set_volume(.1)
         
@@ -169,15 +183,21 @@ def main():
                 # Update snake direction
                 elif event.type == pygame.KEYDOWN:
                     if (event.key == pygame.K_w or event.key == pygame.K_UP) and direction != "DOWN":
+                        snake_move_sound.play()
                         direction = "UP"
                     elif (event.key == pygame.K_a or event.key == pygame.K_LEFT) and direction != "RIGHT":
+                        snake_move_sound.play()
                         direction = "LEFT"
                     elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP":
+                        snake_move_sound.play()
                         direction = "DOWN"
                     elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT":
+                        snake_move_sound.play()
                         direction = "RIGHT"
-            
-        
+                    # Mute/unmute music
+                    elif event.key == pygame.K_m:
+                        mute_music()
+                
             if direction: # Snake begins moving once a direction key is pressed (i.e. if direction != None)
                 # Add new head segment based on direction
                 if direction == "UP":
