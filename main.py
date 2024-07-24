@@ -3,7 +3,7 @@ import pygame
 from random import randrange
 from sys import exit
 from time import time
-from typing import Tuple, List, Any
+from typing import Tuple, List
 
 # Constants
 BLOCK_SIZE: int = 40
@@ -93,7 +93,7 @@ async def welcome_screen() -> None:
         await asyncio.sleep(0)
 
 # Game over screen
-async def game_over(score: int, start_time: float, high_score: int) -> Tuple[bool, Any]:
+async def game_over(score: int, start_time: float, high_score: int) -> Tuple[bool, int]:
     pygame.mixer.music.stop()
     game_over_sound.play()
     
