@@ -5,6 +5,6 @@ This is my first full-fledged PyGame project, and the development process has be
 
 INSTALLATION
 ------------
-snake.py can be downloaded on my itch.io page here:
+snake.py can be either played in-browser or downloaded on my itch.io page here:
 
 https://dylanmckay.itch.io/snakepy
