@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from random import randrange
 from sys import exit
@@ -7,7 +8,7 @@ from time import time
 BLOCK_SIZE = 40
 GAME_WIDTH = 16 * BLOCK_SIZE
 GAME_HEIGHT = 16 * BLOCK_SIZE
-BORDER_WIDTH = 200
+BORDER_WIDTH = 220
 WINDOW_WIDTH = GAME_WIDTH + BORDER_WIDTH
 WINDOW_HEIGHT = GAME_HEIGHT
 HIGH_SCORE_FILE = "data/high_score.txt"
@@ -71,7 +72,7 @@ def toggle_music():
         
 
 # Welcome screen
-def welcome_screen():
+async def welcome_screen():
     while True:
         screen.fill("black")
         display_message("snake.py", 75, "green")
@@ -87,9 +88,11 @@ def welcome_screen():
                 if event.key == pygame.K_DELETE:
                     reset_high_score()
                 return
+            
+        await asyncio.sleep(0)
 
 # Game over screen
-def game_over(score, start_time, high_score):
+async def game_over(score, start_time, high_score):
     pygame.mixer.music.stop()
     game_over_sound.play()
     
@@ -123,21 +126,24 @@ def game_over(score, start_time, high_score):
                 elif event.key == pygame.K_q:
                     pygame.quit()
                     exit()
-
+                    
+        await asyncio.sleep(0)
+        
 # Main script
-def main():
+async def main():
     global screen, game_over_sound # Allows access to draw_grid(), display_message(), welcome_screen(), game_over()
     pygame.init()
+    pygame.mixer.pre_init(44100, 16, 2, 4096)  # Improves sound quality
     pygame.mixer.init()
     
     # Load sound effects
-    snake_move_sound = pygame.mixer.Sound("audio/snake_move.wav")
+    snake_move_sound = pygame.mixer.Sound("audio/snake_move.ogg")
     snake_move_sound.set_volume(.5)
-    eat_sound = pygame.mixer.Sound("audio/eat_sound.wav")
+    eat_sound = pygame.mixer.Sound("audio/eat_sound.ogg")
     eat_sound.set_volume(.8)
-    game_over_sound = pygame.mixer.Sound("audio/game_over.wav")
+    game_over_sound = pygame.mixer.Sound("audio/game_over.ogg")
     game_over_sound.set_volume(.2)
-    high_score_sound = pygame.mixer.Sound("audio/new_high_score.wav")
+    high_score_sound = pygame.mixer.Sound("audio/new_high_score.ogg")
     high_score_sound.set_volume(.15)
     
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -145,12 +151,12 @@ def main():
     clock = pygame.time.Clock()
     
     # Show welcome screen
-    welcome_screen()
+    await welcome_screen()
     
     high_score = read_high_score()
     
     while True:
-        pygame.mixer.music.load("audio/cyborg_ninja.wav")
+        pygame.mixer.music.load("audio/cyborg_ninja.ogg")
         pygame.mixer.music.play(-1) # Loop background music
         pygame.mixer.music.set_volume(.1)
         
@@ -213,11 +219,11 @@ def main():
                     new_head = (snake_segments[0][0], snake_segments[0][1] + snake_speed)
                 elif direction == "RIGHT":
                     new_head = (snake_segments[0][0] + snake_speed, snake_segments[0][1])
-                
+                    
                 # Check for collision with body
                 if new_head in snake_segments:
                     break
-                
+                    
                 # Insert new head segment
                 snake_segments = [new_head] + snake_segments[:-1]
             
@@ -261,12 +267,16 @@ def main():
             
             # Draw all elements & update frames
             pygame.display.update()
-            clock.tick(10)
+            clock.tick(12)
+
+            await asyncio.sleep(0)
 
         # Replay game if 'r' key is pressed
-        play_again, high_score = game_over(score, start_time, high_score) # Unpack play_again option and updated high_score
+        play_again, high_score = await game_over(score, start_time, high_score) # Unpack play_again option and updated high_score
         if play_again:
             continue
         
-if __name__ == "__main__":
-    main()
+        await asyncio.sleep(0)
+
+        
+asyncio.run(main())
