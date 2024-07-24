@@ -34,7 +34,7 @@ def draw_grid() -> None:
             pygame.draw.rect(screen, "grey", rect, 1)
 
 # Display text
-def display_message(text: str, size: int | float, color: pygame.Color | str | int | Tuple[int, int, int], y_offset: int | float = 0, center: bool = True, position: Tuple[int, int] = (0,0)) -> None:
+def display_message(text: str, size: int | float, color: pygame.Color | str | Tuple[int, int, int], y_offset: int | float = 0, center: bool = True, position: Tuple[int, int] = (0,0)) -> None:
     font = pygame.font.Font("fonts/data_latin.ttf", size)
     message = font.render(text, True, color)
     if center:
