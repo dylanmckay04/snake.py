@@ -227,7 +227,10 @@ async def main() -> None:
             
         # Apple surface & attributes
         apple_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-        apple_surface.fill("red")
+        if start_color == RED:
+            apple_surface.fill(GREEN) # Make apple green if snake is red
+        else:
+            apple_surface.fill(RED)
         apple_x_pos, apple_y_pos = get_random_position()
         apple_rect = apple_surface.get_rect(topleft=(apple_x_pos, apple_y_pos))
         
