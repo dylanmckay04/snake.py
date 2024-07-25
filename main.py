@@ -13,8 +13,20 @@ BORDER_WIDTH: int = 280
 WINDOW_WIDTH: int = GAME_WIDTH + BORDER_WIDTH
 WINDOW_HEIGHT: int = GAME_HEIGHT
 HIGH_SCORE_FILE: str = "data/high_score.txt"
-START_COLOR = (0, 255, 0)
-END_COLOR = (0, 100, 0)
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+ORANGE = (255, 165, 0)
+YELLOW = (255, 255, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+PURPLE = (128, 0, 128)
+
+# Initialize default starting color as green
+start_color = (0, 255, 0)
+end_color = (0, 100, 0)
 
 is_music_muted: bool = False # Global variable for toggle_music()
 
@@ -60,8 +72,7 @@ def write_high_score(high_score) -> None:
 
 # Reset high score to 0
 def reset_high_score() -> None:
-    with open(HIGH_SCORE_FILE, 'w') as file:
-        file.write(str(0))
+    write_high_score(0)
 
 # Mute & unmute music
 def toggle_music() -> None:
@@ -86,10 +97,10 @@ async def welcome_screen() -> None:
     while True:
         screen.fill("black")
         display_message("snake.py", 200, "green")
-        display_message("Press any key to start", 95, 'white', 250)
-        display_message("Press 'del' to start with reset High Score", 30, 'white', 500)
+        display_message("Press any key to start", 95, "white", 250)
+        display_message("Press 'del' to start with reset High Score", 30, "white", 500)
         pygame.display.update()
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -104,11 +115,43 @@ async def welcome_screen() -> None:
             
         await asyncio.sleep(0)
 
+# Color select screen
+async def color_selection_screen() -> Tuple[Tuple[int, int, int], Tuple[int, int, int]]:
+    while True:
+        screen.fill("black")
+        display_message("Select Snake Color", 85, "white")
+        display_message("Press 'R' for Red", 50, RED, 100)
+        display_message("Press 'O' for Orange", 50, ORANGE, 150)
+        display_message("Press 'Y' for Yellow", 50, YELLOW, 200)
+        display_message("Press 'G' for Green", 50, GREEN, 250)
+        display_message("Press 'B' for Blue", 50, BLUE, 300)
+        display_message("Press 'P' for Purple", 50, PURPLE, 350)
+        pygame.display.update()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    return RED, (100, 0, 0)
+                elif event.key == pygame.K_o:
+                    return ORANGE, (100, 50, 0)
+                elif event.key == pygame.K_y:
+                    return YELLOW, (185, 165, 0)
+                elif event.key == pygame.K_g:
+                    return GREEN, (0, 100, 0)
+                elif event.key == pygame.K_b:
+                    return BLUE, (0, 0, 100)
+                elif event.key == pygame.K_p:
+                    return PURPLE, (64, 0, 64)
+                
+        await asyncio.sleep(0)
+        
 # Game over screen
 async def game_over(score: int, start_time: float, high_score: int) -> Tuple[bool, int]:
     pygame.mixer.music.stop()
     game_over_sound.play()
-    
     elapsed_time = int(time() - start_time)
     
     # Update high score if needed
@@ -124,8 +167,8 @@ async def game_over(score: int, start_time: float, high_score: int) -> Tuple[boo
         if elapsed_time == 1:
             display_message(f"Total Elapsed Time: {elapsed_time} second", 60, "blue", 260) # Singular form of "second" when only 1 second elapsed before game over
         else:
-            display_message(f"Total Elapsed Time: {elapsed_time} seconds", 80, "blue", 260)
-        display_message("Press 'R' to Restart or 'Q' to Quit", 60, "white", 380)
+            display_message(f"Total Elapsed Time: {elapsed_time} seconds", 60, "blue", 260)
+        display_message("Press 'R' to Restart | 'C' to change color | 'Q' to Quit", 40, "white", 380)
         pygame.display.update()
         
         for event in pygame.event.get():
@@ -135,8 +178,10 @@ async def game_over(score: int, start_time: float, high_score: int) -> Tuple[boo
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     game_over_sound.stop() # Stop game over sound playing over music at start of new game
-                    return True, high_score
-                elif event.key == pygame.K_q:
+                    return True, high_score, False
+                elif event.key == pygame.K_c:
+                    return False, high_score, True
+                elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
                     
@@ -165,7 +210,8 @@ async def main() -> None:
     
     # Show welcome screen
     await welcome_screen()
-    
+    # Show color selection screen and get gradient colors
+    start_color, end_color = await color_selection_screen()
     high_score = read_high_score()
     
     while True:
@@ -173,19 +219,12 @@ async def main() -> None:
         pygame.mixer.music.play(-1) # Loop background music
         pygame.mixer.music.set_volume(.1)
         
-        # Surface for border and inner snake segments
-        # snake_border_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-        # snake_border_surface.fill("black")
-        # inner_snake_surface = pygame.Surface((BLOCK_SIZE - 4, BLOCK_SIZE - 4))
-        # inner_snake_surface.fill("green")
-        # snake_border_surface.blit(inner_snake_surface, (2, 2))
-        
         # Snake attributes
         snake_x_pos: int = BLOCK_SIZE * 7
         snake_y_pos: int = BLOCK_SIZE * 7
         snake_speed: int = BLOCK_SIZE
         direction = None
-        
+            
         # Apple surface & attributes
         apple_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
         apple_surface.fill("red")
@@ -201,7 +240,6 @@ async def main() -> None:
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    # Exit game
                     pygame.quit()
                     exit()
                 # Update snake direction
@@ -218,8 +256,7 @@ async def main() -> None:
                     elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT":
                         snake_move_sound.play()
                         direction = "RIGHT"
-                    # Mute/unmute music
-                    elif event.key == pygame.K_m:
+                    elif event.key == pygame.K_m: # Mute/unmute music
                         toggle_music()
                 
             if direction: # Snake begins moving once a direction key is pressed (i.e. if direction != None)
@@ -262,22 +299,18 @@ async def main() -> None:
                 break
                 
             # Clear screen each frame & draw items
-            screen.fill("black")
+            screen.fill(BLACK)
             draw_grid()
             
             screen.blit(apple_surface, apple_rect.topleft)
             
-            # Draw snake with green gradient
+            # Draw snake with gradient
             for index, segment in enumerate(snake_segments):
-                if len(snake_segments) > 1: # Avoid ZeroDivisionError
-                    factor = index / (len(snake_segments) - 1) 
-                else:
-                    factor = 0
-                segment_color = interpolate_color(START_COLOR, END_COLOR, factor)
+                factor = index / (len(snake_segments) - 1) if len(snake_segments) > 1 else 0
+                segment_color = interpolate_color(start_color, end_color, factor)
                 snake_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
                 snake_surface.fill(segment_color)
                 screen.blit(snake_surface, segment)
-                #screen.blit(snake_border_surface, segment)
             
             # Draw game border
             pygame.draw.rect(screen, pygame.color.Color(20, 11, 71), (GAME_WIDTH, 0, BORDER_WIDTH, WINDOW_HEIGHT))
@@ -292,14 +325,14 @@ async def main() -> None:
             pygame.display.update()
             clock.tick(12)
 
-            await asyncio.sleep(0)
-
         # Replay game if 'r' key is pressed
-        play_again, high_score = await game_over(score, start_time, high_score) # Unpack play_again option and updated high_score
+        play_again, high_score, change_color = await game_over(score, start_time, high_score) # Unpack play_again option and updated high_score
         if play_again:
             continue
-        
+        elif change_color:
+            start_color, end_color = await color_selection_screen()
+            
         await asyncio.sleep(0)
 
-        
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
