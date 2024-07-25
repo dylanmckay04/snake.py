@@ -13,6 +13,8 @@ BORDER_WIDTH: int = 280
 WINDOW_WIDTH: int = GAME_WIDTH + BORDER_WIDTH
 WINDOW_HEIGHT: int = GAME_HEIGHT
 HIGH_SCORE_FILE: str = "data/high_score.txt"
+START_COLOR = (0, 255, 0)
+END_COLOR = (0, 100, 0)
 
 is_music_muted: bool = False # Global variable for toggle_music()
 
@@ -70,7 +72,14 @@ def toggle_music() -> None:
     else:
         pygame.mixer.music.set_volume(0)
         is_music_muted = True
-        
+
+# Interpolate snake color for gradient
+def interpolate_color(start_color, end_color, factor) -> Tuple[int, int, int]:
+    return (
+        int(start_color[0] + (end_color[0] - start_color[0]) * factor),
+        int(start_color[1] + (end_color[1] - start_color[1]) * factor),
+        int(start_color[2] + (end_color[2] - start_color[2]) * factor)
+    )
 
 # Welcome screen
 async def welcome_screen() -> None:
@@ -165,11 +174,11 @@ async def main() -> None:
         pygame.mixer.music.set_volume(.1)
         
         # Surface for border and inner snake segments
-        snake_border_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-        snake_border_surface.fill("black")
-        inner_snake_surface = pygame.Surface((BLOCK_SIZE - 4, BLOCK_SIZE - 4))
-        inner_snake_surface.fill("green")
-        snake_border_surface.blit(inner_snake_surface, (2, 2))
+        # snake_border_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+        # snake_border_surface.fill("black")
+        # inner_snake_surface = pygame.Surface((BLOCK_SIZE - 4, BLOCK_SIZE - 4))
+        # inner_snake_surface.fill("green")
+        # snake_border_surface.blit(inner_snake_surface, (2, 2))
         
         # Snake attributes
         snake_x_pos: int = BLOCK_SIZE * 7
@@ -257,8 +266,18 @@ async def main() -> None:
             draw_grid()
             
             screen.blit(apple_surface, apple_rect.topleft)
-            for segment in snake_segments:
-                screen.blit(snake_border_surface, segment)
+            
+            # Draw snake with green gradient
+            for index, segment in enumerate(snake_segments):
+                if len(snake_segments) > 1: # Avoid ZeroDivisionError
+                    factor = index / (len(snake_segments) - 1) 
+                else:
+                    factor = 0
+                segment_color = interpolate_color(START_COLOR, END_COLOR, factor)
+                snake_surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                snake_surface.fill(segment_color)
+                screen.blit(snake_surface, segment)
+                #screen.blit(snake_border_surface, segment)
             
             # Draw game border
             pygame.draw.rect(screen, pygame.color.Color(20, 11, 71), (GAME_WIDTH, 0, BORDER_WIDTH, WINDOW_HEIGHT))
