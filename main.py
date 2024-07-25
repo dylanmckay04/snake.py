@@ -6,10 +6,10 @@ from time import time
 from typing import Tuple, List
 
 # Constants
-BLOCK_SIZE: int = 40
+BLOCK_SIZE: int = 66
 GAME_WIDTH: int = 16 * BLOCK_SIZE
 GAME_HEIGHT: int = 16 * BLOCK_SIZE
-BORDER_WIDTH: int = 220
+BORDER_WIDTH: int = 280
 WINDOW_WIDTH: int = GAME_WIDTH + BORDER_WIDTH
 WINDOW_HEIGHT: int = GAME_HEIGHT
 HIGH_SCORE_FILE: str = "data/high_score.txt"
@@ -34,7 +34,7 @@ def draw_grid() -> None:
             pygame.draw.rect(screen, "grey", rect, 1)
 
 # Display text
-def display_message(text: str, size: int | float, color: pygame.Color | str | Tuple[int, int, int], y_offset: int | float = 0, center: bool = True, position: Tuple[int, int] = (0,0)) -> None:
+def display_message(text: str, size: int | float, color: pygame.Color | str | Tuple[int, int, int, int], y_offset: int | float = 0, center: bool = True, position: Tuple[int, int] = (0,0)) -> None:
     font = pygame.font.Font("fonts/data_latin.ttf", size)
     message = font.render(text, True, color)
     if center:
@@ -76,9 +76,9 @@ def toggle_music() -> None:
 async def welcome_screen() -> None:
     while True:
         screen.fill("black")
-        display_message("snake.py", 75, "green")
-        display_message("Press any key to start", 50, 'white', 100)
-        display_message("Press 'del' to start with reset High Score", 15, 'white', 300)
+        display_message("snake.py", 200, "green")
+        display_message("Press any key to start", 95, 'white', 250)
+        display_message("Press 'del' to start with reset High Score", 30, 'white', 500)
         pygame.display.update()
         
         for event in pygame.event.get():
@@ -86,8 +86,11 @@ async def welcome_screen() -> None:
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_DELETE: # Start game with reset high score
                     reset_high_score()
+                elif event.key == pygame.K_ESCAPE: # Allow to exit game on main menu by pressing escape
+                    pygame.quit()
+                    exit()
                 return
             
         await asyncio.sleep(0)
@@ -106,14 +109,14 @@ async def game_over(score: int, start_time: float, high_score: int) -> Tuple[boo
         
     while True:
         screen.fill("black")
-        display_message("Game Over!", 60, "red", -40)
-        display_message(f"High Score: {high_score}", 40, "yellow", 20)
-        display_message(f"Your Score: {score}", 40, "green", 80)
+        display_message("Game Over!", 150, "red", -60)
+        display_message(f"High Score: {high_score}", 80, "yellow", 65)
+        display_message(f"Your Score: {score}", 80, "green", 160)
         if elapsed_time == 1:
-            display_message(f"Total Elapsed Time: {elapsed_time} second", 40, "blue", 140) # Singular form of "second" when only 1 second elapsed before game over
+            display_message(f"Total Elapsed Time: {elapsed_time} second", 60, "blue", 260) # Singular form of "second" when only 1 second elapsed before game over
         else:
-            display_message(f"Total Elapsed Time: {elapsed_time} seconds", 40, "blue", 140)
-        display_message("Press 'R' to Restart or 'Q' to Quit", 40, "white", 220)
+            display_message(f"Total Elapsed Time: {elapsed_time} seconds", 80, "blue", 260)
+        display_message("Press 'R' to Restart or 'Q' to Quit", 60, "white", 380)
         pygame.display.update()
         
         for event in pygame.event.get():
@@ -147,7 +150,7 @@ async def main() -> None:
     high_score_sound = pygame.mixer.Sound("audio/new_high_score.ogg")
     high_score_sound.set_volume(.15)
     
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN | pygame.SCALED)
     pygame.display.set_caption("snake.py")
     clock = pygame.time.Clock()
     
@@ -262,9 +265,9 @@ async def main() -> None:
             
             # Display score and time elapsed
             elapsed_time = int(time() - start_time)
-            display_message(f"High Score: {high_score}", 25, pygame.color.Color(255, 0, 100), center=False, position=(GAME_WIDTH + 20, 20))
-            display_message(f"Score: {score}", 25, pygame.color.Color(255, 0, 100), center=False, position=(GAME_WIDTH + 20, 60))
-            display_message(f"Time: {elapsed_time}", 25, pygame.color.Color(255, 0, 100), center=False, position=(GAME_WIDTH + 20, 100))
+            display_message(f"High Score: {high_score}", 30, pygame.color.Color(255, 0, 50), center=False, position=(GAME_WIDTH + 20, 20))
+            display_message(f"Score: {score}", 30, pygame.color.Color(255, 0, 50), center=False, position=(GAME_WIDTH + 20, 80))
+            display_message(f"Time: {elapsed_time}", 30, pygame.color.Color(255, 0, 50), center=False, position=(GAME_WIDTH + 20, 140))
             
             # Draw all elements & update frames
             pygame.display.update()
