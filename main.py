@@ -264,17 +264,17 @@ async def main() -> None:
                 
             if direction: # Snake begins moving once a direction key is pressed (i.e. if direction != None)
                 # Add new head segment based on direction
-                if direction == "UP":
+                if direction == "UP" and (direction != "DOWN" and direction != "LEFT" and direction != "RIGHT"): # Make sure snake does not try to move opposing directions and run into itself
                     new_head = (snake_segments[0][0], snake_segments[0][1] - snake_speed)
-                elif direction == "LEFT":
+                elif direction == "LEFT" and (direction != "DOWN" and direction != "UP" and direction != "RIGHT"):
                     new_head = (snake_segments[0][0] - snake_speed, snake_segments[0][1])
-                elif direction == "DOWN":
+                elif direction == "DOWN" and (direction != "UP" and direction != "LEFT" and direction != "RIGHT"):
                     new_head = (snake_segments[0][0], snake_segments[0][1] + snake_speed)
-                elif direction == "RIGHT":
+                elif direction == "RIGHT" and (direction != "DOWN" and direction != "LEFT" and direction != "UP"):
                     new_head = (snake_segments[0][0] + snake_speed, snake_segments[0][1])
                     
                 # Check for collision with body
-                if new_head in snake_segments:
+                if new_head in snake_segments and (new_head != snake_segments[1] and new_head != snake_segments[2]): # Collision with head and the two segments immediately behind should not count (avoids accidental death by sharp turns and death with only two or three segments):
                     break
                     
                 # Insert new head segment
