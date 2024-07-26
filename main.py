@@ -328,6 +328,7 @@ async def main() -> None:
             pygame.display.update()
             clock.tick(10)
 
+            await asyncio.sleep(0)
         # Replay game if 'r' key is pressed
         play_again, high_score, change_color = await game_over(score, start_time, high_score) # Unpack play_again option and updated high_score
         if play_again:
