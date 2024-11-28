@@ -3,16 +3,15 @@ import pygame
 from random import randrange
 from sys import exit
 from time import time
-from typing import Tuple, List
 
 # Constants
-BLOCK_SIZE: int = 66
-GAME_WIDTH: int = 16 * BLOCK_SIZE
-GAME_HEIGHT: int = 16 * BLOCK_SIZE
-BORDER_WIDTH: int = 280
-WINDOW_WIDTH: int = GAME_WIDTH + BORDER_WIDTH
-WINDOW_HEIGHT: int = GAME_HEIGHT
-HIGH_SCORE_FILE: str = "data/high_score.txt"
+BLOCK_SIZE = 66
+GAME_WIDTH = 16 * BLOCK_SIZE
+GAME_HEIGHT = 16 * BLOCK_SIZE
+BORDER_WIDTH = 280
+WINDOW_WIDTH = GAME_WIDTH + BORDER_WIDTH
+WINDOW_HEIGHT = GAME_HEIGHT
+HIGH_SCORE_FILE = "data/high_score.txt"
 
 # Colors
 BLACK = (0, 0, 0)
@@ -28,27 +27,27 @@ PURPLE = (128, 0, 128)
 start_color = (0, 255, 0)
 end_color = (0, 100, 0)
 
-is_music_muted: bool = False # Global variable for toggle_music()
+is_music_muted = False # Global variable for toggle_music()
 
 # Random coordinates for apple
-def get_random_position() -> Tuple[int, int]:
-    x: int = randrange(0, GAME_WIDTH - BLOCK_SIZE, BLOCK_SIZE)
-    y: int = randrange(0, GAME_HEIGHT - BLOCK_SIZE, BLOCK_SIZE)
+def get_random_position():
+    x = randrange(0, GAME_WIDTH - BLOCK_SIZE, BLOCK_SIZE)
+    y = randrange(0, GAME_HEIGHT - BLOCK_SIZE, BLOCK_SIZE)
     return x, y
 
 # Check if apple spawned inside snake
-def is_apple_in_snake(apple_pos: Tuple[int, int], snake_segments: List[Tuple[int, int]]) -> bool:
+def is_apple_in_snake(apple_pos, snake_segments):
     return apple_pos in snake_segments
 
 # Draw background grid
-def draw_grid() -> None:
+def draw_grid():
     for x in range(0, GAME_WIDTH, BLOCK_SIZE):
         for y in range(0, GAME_HEIGHT, BLOCK_SIZE):
             rect = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
             pygame.draw.rect(screen, "grey", rect, 1)
 
 # Display text
-def display_message(text: str, size: int | float, color: pygame.Color | str | Tuple[int, int, int, int], y_offset: int | float = 0, center: bool = True, position: Tuple[int, int] = (0,0)) -> None:
+def display_message(text, size, color: pygame.Color, y_offset = 0, center = True, position = (0,0)):
     font = pygame.font.Font("fonts/data_latin.ttf", size)
     message = font.render(text, True, color)
     if center:
@@ -58,7 +57,7 @@ def display_message(text: str, size: int | float, color: pygame.Color | str | Tu
     screen.blit(message, message_rect)
 
 # Read high score from file
-def read_high_score() -> int:
+def read_high_score():
     try:
         with open(HIGH_SCORE_FILE, "r") as file:
             return int(file.read().strip())
@@ -66,16 +65,16 @@ def read_high_score() -> int:
         return 0
 
 # Write high score to file
-def write_high_score(high_score) -> None:
+def write_high_score(high_score):
     with open(HIGH_SCORE_FILE, "w") as file:
         file.write(str(high_score))
 
 # Reset high score to 0
-def reset_high_score() -> None:
+def reset_high_score():
     write_high_score(0)
 
 # Mute & unmute music
-def toggle_music() -> None:
+def toggle_music():
     global is_music_muted
     if is_music_muted:
         pygame.mixer.music.set_volume(0.1)
@@ -85,7 +84,7 @@ def toggle_music() -> None:
         is_music_muted = True
 
 # Interpolate snake color for gradient
-def interpolate_color(start_color, end_color, factor) -> Tuple[int, int, int]:
+def interpolate_color(start_color, end_color, factor):
     return (
         int(start_color[0] + (end_color[0] - start_color[0]) * factor),
         int(start_color[1] + (end_color[1] - start_color[1]) * factor),
@@ -93,7 +92,7 @@ def interpolate_color(start_color, end_color, factor) -> Tuple[int, int, int]:
     )
 
 # Welcome screen
-async def welcome_screen() -> None:
+async def welcome_screen():
     while True:
         screen.fill("black")
         display_message("snake.py", 200, "green")
@@ -116,7 +115,7 @@ async def welcome_screen() -> None:
         await asyncio.sleep(0)
 
 # Color select screen
-async def color_selection_screen() -> Tuple[Tuple[int, int, int], Tuple[int, int, int]]:
+async def color_selection_screen():
     while True:
         screen.fill("black")
         display_message("Select Snake Color", 85, "white")
@@ -149,7 +148,7 @@ async def color_selection_screen() -> Tuple[Tuple[int, int, int], Tuple[int, int
         await asyncio.sleep(0)
         
 # Game over screen
-async def game_over(score: int, start_time: float, high_score: int) -> Tuple[bool, int]:
+async def game_over(score, start_time, high_score):
     pygame.mixer.music.stop()
     game_over_sound.play()
     elapsed_time = int(time() - start_time)
@@ -188,7 +187,7 @@ async def game_over(score: int, start_time: float, high_score: int) -> Tuple[boo
         await asyncio.sleep(0)
         
 # Main script
-async def main() -> None:
+async def main():
     global screen, game_over_sound # Allows access for draw_grid(), display_message(), welcome_screen(), game_over()
     pygame.init()
     pygame.mixer.pre_init(44100, 16, 2, 4096)  # Improves sound quality
@@ -220,9 +219,9 @@ async def main() -> None:
         pygame.mixer.music.set_volume(.1)
         
         # Snake attributes
-        snake_x_pos: int = BLOCK_SIZE * 7
-        snake_y_pos: int = BLOCK_SIZE * 7
-        snake_speed: int = BLOCK_SIZE
+        snake_x_pos = BLOCK_SIZE * 7
+        snake_y_pos = BLOCK_SIZE * 7
+        snake_speed = BLOCK_SIZE
         direction = None
             
         # Apple surface & attributes
@@ -235,9 +234,9 @@ async def main() -> None:
         apple_rect = apple_surface.get_rect(topleft=(apple_x_pos, apple_y_pos))
         
         # Initialize snake segments, score & time
-        snake_segments: list[Tuple[int, int]] = [(snake_x_pos, snake_y_pos)]
-        score: int = 0
-        start_time: float = time()
+        snake_segments = [(snake_x_pos, snake_y_pos)]
+        score = 0
+        start_time = time()
         
         # Main gameplay loop
         while True:
